@@ -4,16 +4,19 @@ namespace common\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
- * User model
+ * This is the model class for table "{{%user}}".
  *
- * @property integer $id
+ * @property int $id
  * @property string $username
- * @property string $password_hash write-only password
+ * @property string $password
  * @property string $email
- * @property string $profile
+ * @property string|null $profile
+ *
+ * @property Post[] $posts
  */
 class User extends ActiveRecord
 {
@@ -23,6 +26,42 @@ class User extends ActiveRecord
     public static function tableName()
     {
         return '{{%user}}';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['username', 'password', 'email'], 'required'],
+            [['profile'], 'string'],
+            [['username', 'password', 'email'], 'string', 'max' => 128],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'username' => 'Username',
+            'password' => 'Password',
+            'email' => 'Email',
+            'profile' => 'Profile',
+        ];
+    }
+
+    /**
+     * Gets query for [[Posts]].
+     *
+     * @return ActiveQuery
+     */
+    public function getPosts()
+    {
+        return $this->hasMany(Post::class, ['author_id' => 'id']);
     }
 
     /**
@@ -63,7 +102,7 @@ class User extends ActiveRecord
      */
     public function validatePassword($password)
     {
-        return Yii::$app->security->validatePassword($password, $this->password_hash);
+        return Yii::$app->security->validatePassword($password, $this->password);
     }
 
     /**
@@ -73,7 +112,7 @@ class User extends ActiveRecord
      */
     public function setPassword($password)
     {
-        $this->password_hash = Yii::$app->security->generatePasswordHash($password);
+        $this->password = Yii::$app->security->generatePasswordHash($password);
     }
 
 }
