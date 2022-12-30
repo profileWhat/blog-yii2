@@ -3,7 +3,7 @@
 namespace common\models;
 
 use Yii;
-use yii\behaviors\TimestampBehavior;
+use yii\base\NotSupportedException;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
@@ -16,11 +16,12 @@ use yii\web\IdentityInterface;
  * @property string $password
  * @property string $email
  * @property string|null $profile
- *
  * @property Post[] $posts
  */
-class User extends ActiveRecord
+class User extends ActiveRecord implements IdentityInterface
 {
+    public $verification_token;
+    public $auth_key;
     /**
      * {@inheritdoc}
      */
@@ -66,16 +67,6 @@ class User extends ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        return [
-            TimestampBehavior::class,
-        ];
-    }
-
-    /**
      * Finds user by username
      *
      * @param string $username
@@ -114,6 +105,41 @@ class User extends ActiveRecord
     public function setPassword($password)
     {
         $this->password = Yii::$app->security->generatePasswordHash($password);
+    }
+
+    public static function findIdentity($id)
+    {
+        return static::findOne($id);
+    }
+
+    /**
+     * @throws NotSupportedException
+     */
+    public static function findIdentityByAccessToken($token, $type = null)
+    {
+        throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
+    }
+
+    /**
+     */
+    public function getAuthKey()
+    {
+        return $this->auth_key;
+    }
+
+    /**
+     */
+    public function validateAuthKey($authKey)
+    {
+        return $this->getAuthKey() === $authKey;
+    }
+
+    /**
+     * Generates "remember me" authentication key
+     */
+    public function generateAuthKey()
+    {
+        $this->auth_key = Yii::$app->security->generateRandomString();
     }
 
 }
