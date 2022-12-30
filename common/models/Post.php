@@ -4,6 +4,7 @@ namespace common\models;
 
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "{{%post}}".
@@ -22,6 +23,10 @@ use yii\db\ActiveRecord;
  */
 class Post extends ActiveRecord
 {
+    const STATUS_DRAFT = 1;
+    const STATUS_PUBLISHED = 2;
+    const STATUS_ARCHIVED = 3;
+
     /**
      * {@inheritdoc}
      */
@@ -37,10 +42,14 @@ class Post extends ActiveRecord
     {
         return [
             [['title', 'content', 'status', 'author_id'], 'required'],
-            [['content', 'tags'], 'string'],
-            [['status', 'create_time', 'update_time', 'author_id'], 'integer'],
+            [['content'], 'string'],
+            [['status'], 'in', 'range' => [1, 2, 3]],
+            [['tags'], 'match', 'pattern' => '/^[\w\s,]+$/', 'message' => 'В тегах можно использовать только буквы.'],
+            [['tags'], 'normalizeTags'],
+            [['create_time', 'update_time', 'author_id'], 'integer'],
             [['title'], 'string', 'max' => 128],
             [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['author_id' => 'id']],
+            [['title, status'], 'safe', 'on' => 'search']
         ];
     }
 
@@ -78,6 +87,21 @@ class Post extends ActiveRecord
      */
     public function getComments()
     {
-        return $this->hasMany(Comment::class, ['post_id' => 'id']);
+        return $this->hasMany(Comment::class, ['post_id' => 'id', 'status' => Comment::STATUS_APPROVED]);
+    }
+
+    /**
+     * Gets query for [[Comments]].
+     *
+     * @return integer
+     */
+    public function commentCount()
+    {
+        return Comment::find()->where(['post_id' => 'id', 'status' => Comment::STATUS_APPROVED])->count();
+    }
+
+    public function getUrl()
+    {
+        return Url::to(['post/view', 'id' => $this->id, 'title' => $this->title]);
     }
 }

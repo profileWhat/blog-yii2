@@ -16,6 +16,34 @@ use yii\db\ActiveRecord;
  */
 class Lookup extends ActiveRecord
 {
+    private static $_items = [];
+
+    private static function loadItems($type)
+    {
+        self::$_items[$type] = [];
+        $models = self::findAll([
+            'condition' => 'type=:type',
+            'params' => [':type' => $type],
+            'order' => 'position',
+        ]);
+        foreach ($models as $model)
+            self::$_items[$type][$model->code] = $model->name;
+    }
+
+    public static function item($type, $code)
+    {
+        if (!isset(self::$_items[$type]))
+            self::loadItems($type);
+        return self::$_items[$type][$code] ?? false;
+    }
+
+    public static function items($type)
+    {
+        if (!isset(self::$_items[$type]))
+            self::loadItems($type);
+        return self::$_items[$type];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -49,4 +77,5 @@ class Lookup extends ActiveRecord
             'position' => 'Position',
         ];
     }
+
 }

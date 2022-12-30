@@ -22,6 +22,9 @@ use yii\db\ActiveRecord;
  */
 class Comment extends ActiveRecord
 {
+    const STATUS_PENDING = 1;
+    const STATUS_APPROVED = 2;
+
     /**
      * {@inheritdoc}
      */
