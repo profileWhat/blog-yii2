@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Lookup;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -18,13 +19,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'tags')->textarea(['rows' => 6]) ?>
 
-    <?= $form->field($model, 'status')->textInput() ?>
-
-    <?= $form->field($model, 'create_time')->textInput() ?>
-
-    <?= $form->field($model, 'update_time')->textInput() ?>
-
-    <?= $form->field($model, 'author_id')->textInput() ?>
+    <?= $form->field($model, 'status')->dropDownList(Lookup::items('PostStatus'), ['prompt'=>'Select...']) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

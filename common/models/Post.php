@@ -2,8 +2,12 @@
 
 namespace common\models;
 
+use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\BaseActiveRecord;
 use yii\helpers\Url;
 
 /**
@@ -26,6 +30,9 @@ class Post extends ActiveRecord
     const STATUS_DRAFT = 1;
     const STATUS_PUBLISHED = 2;
     const STATUS_ARCHIVED = 3;
+
+    private $_oldTags;
+
 
     /**
      * {@inheritdoc}
@@ -95,7 +102,7 @@ class Post extends ActiveRecord
      *
      * @return integer
      */
-    public function commentCount()
+    public function getCommentCount()
     {
         return Comment::find()->where(['post_id' => 'id', 'status' => Comment::STATUS_APPROVED])->count();
     }
@@ -103,5 +110,37 @@ class Post extends ActiveRecord
     public function getUrl()
     {
         return Url::to(['post/view', 'id' => $this->id, 'title' => $this->title]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeSave($insert)
+    {
+        if(parent::beforeSave($insert))
+        {
+            if($this->isNewRecord)
+            {
+                $this->create_time=$this->update_time=time();
+                $this->author_id=Yii::$app->user->id;
+            }
+            else
+                $this->update_time=time();
+            return true;
+        }
+        else
+            return false;
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        (new Tag)->updateFrequency($this->_oldTags, $this->tags);
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->_oldTags=$this->tags;
     }
 }

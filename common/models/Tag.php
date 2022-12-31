@@ -44,4 +44,39 @@ class Tag extends ActiveRecord
             'frequency' => 'Frequency',
         ];
     }
+
+
+    public static function string2array($tags)
+    {
+        return preg_split('/\s*,\s*/', trim($tags), -1, PREG_SPLIT_NO_EMPTY);
+    }
+
+    public function updateFrequency($oldTags, $newTags)
+    {
+        $oldTags = self::string2array($oldTags);
+        $newTags = self::string2array($newTags);
+        $this->addTags(array_values(array_diff($newTags, $oldTags)));
+        $this->removeTags(array_values(array_diff($oldTags, $newTags)));
+    }
+
+    public function addTags($tags)
+    {
+        $this->updateCounters(['frequency' => 1]);
+        foreach ($tags as $name) {
+            if (!Tag::find()->where(['name' => $name])->exists()) {
+                $tag = new Tag;
+                $tag->name = $name;
+                $tag->frequency = 1;
+                $tag->save();
+            }
+        }
+    }
+
+    public function removeTags($tags)
+    {
+        if (empty($tags))
+            return;
+        $this->updateCounters(array('frequency' => -1));
+        $this->deleteAll('frequency<=0');
+    }
 }

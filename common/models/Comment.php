@@ -2,8 +2,10 @@
 
 namespace common\models;
 
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\BaseActiveRecord;
 
 
 /**
@@ -24,6 +26,18 @@ class Comment extends ActiveRecord
 {
     const STATUS_PENDING = 1;
     const STATUS_APPROVED = 2;
+
+
+    public function behaviors(){
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::className(),
+                'attributes' => [
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['create_time'],
+                ],
+            ]
+        ];
+    }
 
     /**
      * {@inheritdoc}

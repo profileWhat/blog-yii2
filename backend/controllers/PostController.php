@@ -4,6 +4,7 @@ namespace common\controllers;
 
 use common\models\Post;
 use yii\data\ActiveDataProvider;
+use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -13,6 +14,7 @@ use yii\filters\VerbFilter;
  */
 class PostController extends Controller
 {
+
     /**
      * @inheritDoc
      */
@@ -27,6 +29,15 @@ class PostController extends Controller
                         'delete' => ['POST'],
                     ],
                 ],
+                'access' => [
+                    'class' => AccessControl::class,
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
+                        ]
+                    ]
+                ]
             ]
         );
     }
