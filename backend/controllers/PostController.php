@@ -3,6 +3,7 @@
 namespace common\controllers;
 
 use common\models\Post;
+use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -49,18 +50,17 @@ class PostController extends Controller
      */
     public function actionIndex()
     {
+        $tags = $_GET['tag'];
         $dataProvider = new ActiveDataProvider([
-            'query' => Post::find(),
-            /*
+            'query' => Post::find()->where(['condition' => Post::STATUS_PUBLISHED, 'tags' => $tags]),
             'pagination' => [
-                'pageSize' => 50
+                'pageSize' => 5
             ],
             'sort' => [
                 'defaultOrder' => [
                     'id' => SORT_DESC,
                 ]
             ],
-            */
         ]);
 
         return $this->render('index', [
@@ -146,7 +146,12 @@ class PostController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = Post::findOne(['id' => $id])) !== null) {
+        if(Yii::$app->user->isGuest)
+            $condition='status='.Post::STATUS_PUBLISHED
+                .' OR status='.Post::STATUS_ARCHIVED;
+        else
+            $condition='';
+        if (($model = Post::findOne(['id' => $id, $condition])) !== null) {
             return $model;
         }
 

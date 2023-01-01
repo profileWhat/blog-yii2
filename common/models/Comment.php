@@ -55,6 +55,7 @@ class Comment extends ActiveRecord
         return [
             [['content', 'status', 'author', 'email', 'post_id'], 'required'],
             [['content'], 'string'],
+            ['email','email'],
             [['status', 'create_time', 'post_id'], 'integer'],
             [['author', 'email', 'url'], 'string', 'max' => 128],
             [['post_id'], 'exist', 'skipOnError' => true, 'targetClass' => Post::class, 'targetAttribute' => ['post_id' => 'id']],
