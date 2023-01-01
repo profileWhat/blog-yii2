@@ -7,6 +7,7 @@ use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -129,12 +130,28 @@ class PostController extends Controller
      * @param int $id ID
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
+     * @throws HttpException
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        if(Yii::$app->request->isPost) {
+            $this->findModel($id)->delete();
 
-        return $this->redirect(['index']);
+            return $this->redirect(['index']);
+        } else throw new HttpException(400, 'Invalid request. Please do not repeat this request again.');
+    }
+
+    /**
+     * Manages all models.
+     */
+    public function actionAdmin()
+    {
+        $model=new Post('search');
+        if(isset($_GET['Post']))
+            $model->attributes=$_GET['Post'];
+        $this->render('admin',array(
+            'model'=>$model,
+        ));
     }
 
     /**

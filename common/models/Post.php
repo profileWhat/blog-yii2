@@ -34,6 +34,23 @@ class Post extends ActiveRecord
     private $_oldTags;
 
 
+    public function behaviors(){
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::className(),
+                'attributes' => [
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['create_time', 'update_time'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['update_time'],
+                ],
+            ],
+            [
+                'class' => BlameableBehavior::className(),
+                'createdByAttribute' => 'author_id',
+                'updatedByAttribute' => 'author_id',
+            ],
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -112,26 +129,6 @@ class Post extends ActiveRecord
         return Url::to(['post/view', 'id' => $this->id, 'title' => $this->title]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function beforeSave($insert)
-    {
-        if(parent::beforeSave($insert))
-        {
-            if($this->isNewRecord)
-            {
-                $this->create_time=$this->update_time=time();
-                $this->author_id=Yii::$app->user->id;
-            }
-            else
-                $this->update_time=time();
-            return true;
-        }
-        else
-            return false;
-    }
-
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
@@ -142,5 +139,13 @@ class Post extends ActiveRecord
     {
         parent::afterFind();
         $this->_oldTags=$this->tags;
+    }
+
+
+    public function afterDelete()
+    {
+        parent::afterDelete();
+        Comment::deleteAll('post_id='.$this->id);
+        Tag::updateFrequency($this->tags, '');
     }
 }

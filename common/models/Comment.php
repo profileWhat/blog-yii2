@@ -55,7 +55,8 @@ class Comment extends ActiveRecord
         return [
             [['content', 'status', 'author', 'email', 'post_id'], 'required'],
             [['content'], 'string'],
-            ['email','email'],
+            [['email'],'email'],
+            [['url'], 'url'],
             [['status', 'create_time', 'post_id'], 'integer'],
             [['author', 'email', 'url'], 'string', 'max' => 128],
             [['post_id'], 'exist', 'skipOnError' => true, 'targetClass' => Post::class, 'targetAttribute' => ['post_id' => 'id']],
@@ -68,14 +69,14 @@ class Comment extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'content' => 'Content',
+            'id' => 'Id',
+            'content' => 'Comment',
             'status' => 'Status',
             'create_time' => 'Create Time',
-            'author' => 'Author',
+            'author' => 'Name',
             'email' => 'Email',
-            'url' => 'Url',
-            'post_id' => 'Post ID',
+            'url' => 'Website',
+            'post_id' => 'Post',
         ];
     }
 
@@ -88,4 +89,5 @@ class Comment extends ActiveRecord
     {
         return $this->hasOne(Post::class, ['id' => 'post_id']);
     }
+
 }
