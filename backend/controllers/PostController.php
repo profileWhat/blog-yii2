@@ -16,38 +16,30 @@ use yii\filters\VerbFilter;
  */
 class PostController extends Controller
 {
-
-    /**
-     * @inheritDoc
-     */
     public function behaviors()
     {
-        return array_merge(
-            parent::behaviors(),
-            [
-                'verbs' => [
-                    'class' => VerbFilter::className(),
-                    'actions' => [
-                        'delete' => ['POST'],
+        return [
+            'verbs' => [
+                'class' => VerbFilter::className(),
+                'actions' => [
+                    'delete' => ['post'],
+                ],
+            ],
+            'access' => [
+                'class' => AccessControl::className(),
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['@'],
                     ],
                 ],
-                'access' => [
-                    'class' => AccessControl::class,
-                    'rules' => [
-                        [
-                            'allow' => true,
-                            'roles' => ['@'],
-                        ]
-                    ]
-                ]
-            ]
-        );
+            ],
+        ];
     }
 
     /**
      * Lists all Post models.
-     *
-     * @return string
+     * @return mixed
      */
     public function actionIndex()
     {
@@ -71,9 +63,8 @@ class PostController extends Controller
 
     /**
      * Displays a single Post model.
-     * @param int $id ID
-     * @return string
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param integer $id
+     * @return mixed
      */
     public function actionView($id)
     {
@@ -85,93 +76,75 @@ class PostController extends Controller
     /**
      * Creates a new Post model.
      * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
+     * @return mixed
      */
     public function actionCreate()
     {
         $model = new Post();
 
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->id]);
         } else {
-            $model->loadDefaultValues();
+            return $this->render('create', [
+                'model' => $model,
+            ]);
         }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
     }
 
     /**
      * Updates an existing Post model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param integer $id
+     * @return mixed
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
+        } else {
+            return $this->render('update', [
+                'model' => $model,
+            ]);
         }
+    }
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+    public function actionTest()
+    {
+        $t=\common\models\Tag::find()->where(['name'=>'yii'])->exists();
+        if($t)
+        {
+            echo 'Add tag!';
+        }
     }
 
     /**
      * Deletes an existing Post model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     * @throws HttpException
+     * @param integer $id
+     * @return mixed
      */
     public function actionDelete($id)
     {
-        if(Yii::$app->request->isPost) {
-            $this->findModel($id)->delete();
+        $this->findModel($id)->delete();
 
-            return $this->redirect(['index']);
-        } else throw new HttpException(400, 'Invalid request. Please do not repeat this request again.');
-    }
-
-    /**
-     * Manages all models.
-     */
-    public function actionAdmin()
-    {
-        $model=new Post('search');
-        if(isset($_GET['Post']))
-            $model->attributes=$_GET['Post'];
-        $this->render('admin',array(
-            'model'=>$model,
-        ));
+        return $this->redirect(['index']);
     }
 
     /**
      * Finds the Post model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
+     * @param integer $id
      * @return Post the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if(Yii::$app->user->isGuest)
-            $condition='status='.Post::STATUS_PUBLISHED
-                .' OR status='.Post::STATUS_ARCHIVED;
-        else
-            $condition='';
-        if (($model = Post::findOne(['id' => $id, $condition])) !== null) {
+        if (($model = Post::findOne($id)) !== null) {
             return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
         }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

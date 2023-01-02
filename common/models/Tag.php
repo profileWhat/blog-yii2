@@ -51,17 +51,20 @@ class Tag extends ActiveRecord
         return preg_split('/\s*,\s*/', trim($tags), -1, PREG_SPLIT_NO_EMPTY);
     }
 
-    public function updateFrequency($oldTags, $newTags)
+    public static function updateFrequency($oldTags, $newTags)
     {
         $oldTags = self::string2array($oldTags);
         $newTags = self::string2array($newTags);
-        $this->addTags(array_values(array_diff($newTags, $oldTags)));
-        $this->removeTags(array_values(array_diff($oldTags, $newTags)));
+        self::addTags(array_values(array_diff($newTags, $oldTags)));
+        self::removeTags(array_values(array_diff($oldTags, $newTags)));
     }
 
-    public function addTags($tags)
+    public static function addTags($tags)
     {
-        $this->updateCounters(['frequency' => 1]);
+        $models=self::findAll(['name'=>$tags]);
+        foreach ($models as $model) {
+            $model->updateCounters(['frequency'=>1]);
+        }
         foreach ($tags as $name) {
             if (!Tag::find()->where(['name' => $name])->exists()) {
                 $tag = new Tag;
@@ -72,11 +75,14 @@ class Tag extends ActiveRecord
         }
     }
 
-    public function removeTags($tags)
+    public static function removeTags($tags)
     {
         if (empty($tags))
             return;
-        $this->updateCounters(array('frequency' => -1));
-        $this->deleteAll('frequency<=0');
+        $models=self::findAll(['name'=>$tags]);
+        foreach ($models as $model) {
+            $model->updateCounters(['frequency'=>-1]);
+        }
+        self::deleteAll('frequency<=0');
     }
 }
