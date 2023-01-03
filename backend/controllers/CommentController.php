@@ -3,7 +3,10 @@
 namespace common\controllers;
 
 use common\models\Comment;
+use HttpException;
+use Yii;
 use yii\data\ActiveDataProvider;
+use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -21,6 +24,15 @@ class CommentController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::className(),
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
@@ -39,17 +51,15 @@ class CommentController extends Controller
     public function actionIndex()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => Comment::find(),
-            /*
+            'query' => Comment::find()->orderBy(['status' => Comment::STATUS_PENDING]),
             'pagination' => [
-                'pageSize' => 50
+                'pageSize' => 5
             ],
             'sort' => [
                 'defaultOrder' => [
                     'id' => SORT_DESC,
                 ]
             ],
-            */
         ]);
 
         return $this->render('index', [
@@ -125,6 +135,24 @@ class CommentController extends Controller
 
         return $this->redirect(['index']);
     }
+
+
+    /**
+     * @throws HttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionApprove($id) {
+
+        if(Yii::$app->request->isPost)
+        {
+            $comment=$this->findModel($id);
+            $comment->approve();
+            $this->redirect(array('index'));
+        }
+        else
+            throw new HttpException(400,'Invalid request...');
+    }
+
 
     /**
      * Finds the Comment model based on its primary key value.

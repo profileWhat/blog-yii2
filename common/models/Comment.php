@@ -90,4 +90,13 @@ class Comment extends ActiveRecord
         return $this->hasOne(Post::class, ['id' => 'post_id']);
     }
 
+    /**
+     * @throws \yii\db\StaleObjectException
+     * @throws \Throwable
+     */
+    public function approve()
+    {
+        $this->status=Comment::STATUS_APPROVED;
+        $this->update(['status']);
+    }
 }
