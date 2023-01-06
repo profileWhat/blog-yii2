@@ -1,8 +1,9 @@
 <?php
 
-namespace common\controllers;
+namespace backend\controllers;
 
 use common\models\Post;
+use common\models\repositories\PostRepository;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
@@ -43,18 +44,7 @@ class PostController extends Controller
      */
     public function actionIndex()
     {
-        $tags = $_GET['tag'];
-        $dataProvider = new ActiveDataProvider([
-            'query' => Post::find()->where(['condition' => Post::STATUS_PUBLISHED, 'tags' => $tags]),
-            'pagination' => [
-                'pageSize' => 5
-            ],
-            'sort' => [
-                'defaultOrder' => [
-                    'id' => SORT_DESC,
-                ]
-            ],
-        ]);
+        $dataProvider = PostRepository::findAllAsDataProvider();
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
@@ -81,7 +71,6 @@ class PostController extends Controller
     public function actionCreate()
     {
         $model = new Post();
-
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {

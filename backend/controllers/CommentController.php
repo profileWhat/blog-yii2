@@ -1,12 +1,13 @@
 <?php
 
-namespace common\controllers;
+namespace backend\controllers;
 
 use common\models\Comment;
 use HttpException;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -85,13 +86,17 @@ class CommentController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
-    public function actionCreate()
+    public function actionCreate($post_id)
     {
         $model = new Comment();
-
+        $model->post_id = $post_id;
+        $model->author = Yii::$app->user->identity->username;
+        $model->url = Url::base('http');;
+        $model->email = Yii::$app->user->identity->email;
+        $model->status = Comment::STATUS_APPROVED;
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+                return $this->redirect(['site/index']);
             }
         } else {
             $model->loadDefaultValues();

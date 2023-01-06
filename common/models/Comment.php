@@ -6,6 +6,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
+use yii\helpers\Html;
 
 
 /**
@@ -53,13 +54,12 @@ class Comment extends ActiveRecord
     public function rules()
     {
         return [
-            [['content', 'status', 'author', 'email', 'post_id'], 'required'],
+            [['content', 'author', 'email'], 'required'],
             [['content'], 'string'],
             [['email'],'email'],
             [['url'], 'url'],
             [['status', 'create_time', 'post_id'], 'integer'],
             [['author', 'email', 'url'], 'string', 'max' => 128],
-            [['post_id'], 'exist', 'skipOnError' => true, 'targetClass' => Post::class, 'targetAttribute' => ['post_id' => 'id']],
         ];
     }
 
@@ -98,5 +98,29 @@ class Comment extends ActiveRecord
     {
         $this->status=Comment::STATUS_APPROVED;
         $this->update(['status']);
+    }
+
+    public static function findRecentComments($limit=10)
+    {
+        return static::find()->where('status='.self::STATUS_APPROVED)
+            ->orderBy('create_time DESC')
+            ->limit($limit)
+            ->with('post')
+            ->all();
+    }
+
+    public function getUrl($post=null)
+    {
+        if($post===null)
+            $post=$this->post;
+        return $post->url.'#c'.$this->id;
+    }
+
+    public function getAuthorLink()
+    {
+        if(!empty($this->url))
+            return Html::a(Html::encode($this->author),$this->url);
+        else
+            return Html::encode($this->author);
     }
 }

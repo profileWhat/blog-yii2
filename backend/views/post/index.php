@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Lookup;
 use common\models\Post;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -30,7 +31,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'title',
             'content:ntext',
             'tags:ntext',
-            'status',
+            [
+                'attribute'=>'status',
+                'value'=>function($model){
+                    return Lookup::item('PostStatus',$model->status);
+                }
+            ],
             //'create_time:datetime',
             //'update_time:datetime',
             //'author_id',
