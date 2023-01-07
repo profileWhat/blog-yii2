@@ -1,6 +1,6 @@
 <?php
 
-namespace common\controllers;
+namespace frontend\controllers;
 
 use common\models\Comment;
 use common\models\Post;
@@ -37,31 +37,6 @@ class PostController extends Controller
     }
 
     /**
-     * Lists all Post models.
-     *
-     * @return string
-     */
-    public function actionIndex()
-    {
-        $tags = $_GET['tag'];
-        $dataProvider = new ActiveDataProvider([
-            'query' => Post::find()->where(['condition' => Post::STATUS_PUBLISHED, 'tags' => $tags]),
-            'pagination' => [
-                'pageSize' => 5
-            ],
-            'sort' => [
-                'defaultOrder' => [
-                    'id' => SORT_DESC,
-                ]
-            ],
-        ]);
-
-        return $this->render('index', [
-            'dataProvider' => $dataProvider,
-        ]);
-    }
-
-    /**
      * Displays a single Post model.
      * @param int $id ID
      * @return string|\yii\web\Response
@@ -69,17 +44,9 @@ class PostController extends Controller
      */
     public function actionView($id)
     {
-        $comment = new Comment();
         $model = $this->findModel($id);
-        if ($comment->load($_POST) && $model->addComment($comment)) {
-            if ($comment->status == Comment::STATUS_PENDING) {
-                Yii::$app->getSession()->setFlash('warning', 'Thank you for your comment. Your comment will be posted once it is approved.');
-            }
-            return $this->refresh();
-        }
         return $this->render('view', [
-            'model' => $model,
-            'comment' => $comment,
+            'model' => $model
         ]);
     }
 

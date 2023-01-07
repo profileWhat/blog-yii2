@@ -1,5 +1,6 @@
 <?php
 
+use common\widgets\Post;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -11,28 +12,5 @@ $this->params['breadcrumbs'][] = ['label' => 'Posts', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="post-view">
-    <?php echo $this->context->renderPartial('_item', array(
-        'model' => $model
-    )); ?>
-
-    <div id="comments" class="row-fluid">
-        <?php
-        if ($model->commentCount >= 1): ?>
-            <h3>
-                <?php echo $model->commentCount > 1 ? $model->commentCount . ' comments' : 'One comment'; ?>
-            </h3>
-
-            <?php echo $this->context->renderPartial('_comments', array(
-                'post' => $model,
-                'comments' => $model->comments,
-            )); ?>
-        <?php endif; ?>
-
-        <?php echo $this->context->renderPartial('/comment/_form', array(
-            'model' => $comment,
-        )); ?>
-
-
-    </div><!-- comments -->
-
+    <?= Post::widget(['post' => $model]); ?>
 </div>

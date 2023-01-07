@@ -1,5 +1,6 @@
 <?php
 
+use common\widgets\Comment;
 use yii\helpers\Html;
 
 /** @var yii\web\View $this */
@@ -13,9 +14,7 @@ $this->params['breadcrumbs'][] = 'Update';
 <div class="comment-update">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
-    <?= $this->render('_form', [
-        'model' => $model,
-    ]) ?>
+    <?= Comment::widget(['comment' => $model]); ?>
+    <?= Html::a('Approve', ['approve', 'id' => $model->id], ['class' => 'btn btn-primary mt-3']) ?>
 
 </div>

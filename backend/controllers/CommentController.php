@@ -117,8 +117,7 @@ class CommentController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -146,16 +145,11 @@ class CommentController extends Controller
      * @throws HttpException
      * @throws NotFoundHttpException
      */
-    public function actionApprove($id) {
-
-        if(Yii::$app->request->isPost)
-        {
-            $comment=$this->findModel($id);
-            $comment->approve();
-            $this->redirect(array('index'));
-        }
-        else
-            throw new HttpException(400,'Invalid request...');
+    public function actionApprove($id)
+    {
+        $comment = $this->findModel($id);
+        $comment->approve();
+        $this->redirect(array('index'));
     }
 
 
