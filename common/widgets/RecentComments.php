@@ -17,6 +17,6 @@ class RecentComments extends Widget
 
     public function run()
     {
-        return $this->render('recentComments');
+        return $this->render('_recent_comments');
     }
 }

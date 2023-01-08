@@ -2,6 +2,7 @@
 <div class="container post-view">
 
     <?php use common\widgets\Post;
+    use yii\helpers\Html;
     use yii\widgets\LinkPager;
 
     foreach ($this->context->posts as $post): ?>

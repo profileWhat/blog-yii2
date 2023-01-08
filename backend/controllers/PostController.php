@@ -44,7 +44,7 @@ class PostController extends Controller
      */
     public function actionIndex()
     {
-        $dataProvider = PostRepository::findAllAsDataProvider();
+        $dataProvider = PostRepository::findAll();
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
@@ -99,15 +99,6 @@ class PostController extends Controller
         }
     }
 
-    public function actionTest()
-    {
-        $t=\common\models\Tag::find()->where(['name'=>'yii'])->exists();
-        if($t)
-        {
-            echo 'Add tag!';
-        }
-    }
-
     /**
      * Deletes an existing Post model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
@@ -136,4 +127,5 @@ class PostController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+
 }

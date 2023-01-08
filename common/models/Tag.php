@@ -53,7 +53,7 @@ class Tag extends ActiveRecord
 
     public static function array2string($tags)
     {
-        return implode(', ',$tags);
+        return implode(', ', $tags);
     }
 
     public static function updateFrequency($oldTags, $newTags)
@@ -66,9 +66,9 @@ class Tag extends ActiveRecord
 
     public static function addTags($tags)
     {
-        $models=self::findAll(['name'=>$tags]);
+        $models = self::findAll(['name' => $tags]);
         foreach ($models as $model) {
-            $model->updateCounters(['frequency'=>1]);
+            $model->updateCounters(['frequency' => 1]);
         }
         foreach ($tags as $name) {
             if (!Tag::find()->where(['name' => $name])->exists()) {
@@ -84,10 +84,30 @@ class Tag extends ActiveRecord
     {
         if (empty($tags))
             return;
-        $models=self::findAll(['name'=>$tags]);
+        $models = self::findAll(['name' => $tags]);
         foreach ($models as $model) {
-            $model->updateCounters(['frequency'=>-1]);
+            $model->updateCounters(['frequency' => -1]);
         }
         self::deleteAll('frequency<=0');
+    }
+
+    public static function findTagWeights($limit = 20)
+    {
+        $models = self::find()
+            ->orderBy('frequency DESC')
+            ->limit($limit)
+            ->all();
+
+        $total = 0;
+        foreach ($models as $model)
+            $total += $model->frequency;
+
+        $tags = array();
+        if ($total > 0) {
+            foreach ($models as $model)
+                $tags[$model->name] = 8 + (int)(16 * $model->frequency / ($total + 10));
+            ksort($tags);
+        }
+        return $tags;
     }
 }

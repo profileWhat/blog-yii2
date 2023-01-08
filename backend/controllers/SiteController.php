@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use common\models\LoginForm;
+use common\models\PostSearch;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -28,7 +29,7 @@ class SiteController extends Controller
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['logout', 'index'],
+                        'actions' => ['logout', 'index', 'reset'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -62,6 +63,12 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
+        if(isset($_GET['tags'])) {
+            PostSearch::searchByTags($_GET['tags']);
+        } else {
+            $searchModel = new PostSearch();
+            $searchModel->search(Yii::$app->request->queryParams);
+        }
         return $this->render('index');
     }
 
@@ -100,5 +107,11 @@ class SiteController extends Controller
         Yii::$app->user->logout();
 
         return $this->goHome();
+    }
+
+    public function actionReset() {
+        $searchModel = new PostSearch();
+        $searchModel->reset();
+        return $this->render('index');
     }
 }
